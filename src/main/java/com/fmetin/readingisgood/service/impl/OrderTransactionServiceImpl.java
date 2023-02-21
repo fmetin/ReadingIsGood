@@ -9,6 +9,7 @@ import com.fmetin.readingisgood.service.BookService;
 import com.fmetin.readingisgood.service.OrderService;
 import com.fmetin.readingisgood.service.OrderTransactionService;
 import com.fmetin.readingisgood.shared.RestException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
+@Slf4j
 public class OrderTransactionServiceImpl implements OrderTransactionService {
 
     private final OrderService orderService;
@@ -43,7 +45,7 @@ public class OrderTransactionServiceImpl implements OrderTransactionService {
             OrderDetail orderDetail = orderMapper.mapOrderToOrderDetail(order);
             orderDetail.setBookId(orderDetailsDto.getBookId());
             orderDetail.setCount(orderDetailsDto.getCount());
-            BigDecimal totalAmount = bookService.findByBookId(orderDetailsDto.getBookId()).getPrice()
+            BigDecimal totalAmount = bookService.findByBookIdToGetPrice(orderDetailsDto.getBookId())
                     .multiply(BigDecimal.valueOf(orderDetailsDto.getCount()));
             orderDetail.setTotalAmount(totalAmount);
             orderService.saveOrderDetail(orderDetail);
@@ -65,5 +67,6 @@ public class OrderTransactionServiceImpl implements OrderTransactionService {
         }
         order.setStatus(OrderStatusEnum.COMPLETED.getStatus());
         orderService.save(order);
+        log.info("end of order transaction service");
     }
 }

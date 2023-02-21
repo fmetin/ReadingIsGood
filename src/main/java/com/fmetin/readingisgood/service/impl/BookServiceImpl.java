@@ -9,6 +9,7 @@ import com.fmetin.readingisgood.service.BookService;
 import com.fmetin.readingisgood.shared.RestException;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -42,6 +43,16 @@ public class BookServiceImpl implements BookService {
         if (optionalBook.isEmpty())
             throw new RestException(BOOK_NOT_FOUND);
         return optionalBook.get();
+    }
+
+    @Override
+    public BigDecimal findByBookIdToGetPrice(Long bookId) {
+        return bookRepository.findByBookIdToGetPrice(bookId);
+    }
+
+    @Override
+    public int findByBookIdToGetStock(Long bookId) {
+        return bookRepository.findByBookIdToGetStock(bookId);
     }
 
     @Override

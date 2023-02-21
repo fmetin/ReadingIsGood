@@ -20,6 +20,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -67,14 +68,14 @@ public class OrderServiceImpl implements OrderService {
                 LockExecutionResult<String> result = locker.lock(key, redisLockAcquiredSeconds, redisLockTimeoutSeconds, () -> {
                     final long startTimestamp = System.currentTimeMillis();
                     final long lockTimeout = TimeUnit.SECONDS.toMillis(redisLockTimeoutSeconds);
-                    Book book = bookService.findByBookId(orderDetailsDto.getBookId());
-                    log.info("book stock:{}", book.getStock());
-                    if (book.getStock() - orderDetailsDto.getCount() < 0)
+                    int stock = bookService.findByBookIdToGetStock(orderDetailsDto.getBookId());
+                    log.info("book stock:{}", stock);
+                    if (stock - orderDetailsDto.getCount() < 0)
                         throw new RestException(THERE_IS_NOT_STOCK);
 
                     UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
                     updateBookStocksRequestDto.setBookId(orderDetailsDto.getBookId());
-                    updateBookStocksRequestDto.setStock(book.getStock() - orderDetailsDto.getCount());
+                    updateBookStocksRequestDto.setStock(stock - orderDetailsDto.getCount());
                     if (System.currentTimeMillis() - startTimestamp >= lockTimeout) {
                         throw new RestException(TRANSACTION_TIMEOUT);
                     }
