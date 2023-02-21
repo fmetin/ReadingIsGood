@@ -103,9 +103,9 @@ public class OrderServiceImpl implements OrderService {
         if (page.getContent().isEmpty())
             return responseDto;
         List<Order> orderList = page.getContent();
-        orderList.forEach(order -> {
-            customerOrderList.add(getOrderById(order.getOrderId()));
-        });
+        orderList.forEach(order ->
+                customerOrderList.add(getOrderById(order.getOrderId()))
+        );
         responseDto.setSize(page.getSize());
         responseDto.setTotalElements(page.getTotalElements());
         responseDto.setTotalPages(page.getTotalPages());

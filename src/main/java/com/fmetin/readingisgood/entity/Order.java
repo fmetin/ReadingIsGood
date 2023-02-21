@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Getter
@@ -17,6 +18,8 @@ public class Order {
     private long orderId;
     private long customerId;
     private int status;
+    private BigDecimal totalAmount;
+    private int countOfItems;
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdDate;
 }

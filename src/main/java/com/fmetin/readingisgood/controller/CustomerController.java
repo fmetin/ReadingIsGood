@@ -26,13 +26,13 @@ public class CustomerController {
     }
 
     @PostMapping("/v1/create-customer")
-    public ResponseEntity<RestResponse<?>> createCustomer(@Valid @RequestBody CreateCustomerRequestDto request) {
+    public ResponseEntity<RestResponse<Object>> createCustomer(@Valid @RequestBody CreateCustomerRequestDto request) {
         customerService.createCustomer(request);
         return ResponseEntity.ok(new RestResponse<>());
     }
 
     @GetMapping("/v1/customer-orders")
-    public ResponseEntity<?> getCustomerOrders(
+    public ResponseEntity<Object> getCustomerOrders(
             @CurrentUser CustomerUserDetails customerUserDetails,
             @PageableDefault(size = 5, sort = "createdDate", direction = Sort.Direction.DESC) Pageable pageable) {
 

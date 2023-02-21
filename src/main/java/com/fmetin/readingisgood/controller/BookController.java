@@ -22,13 +22,13 @@ public class BookController {
     }
 
     @PostMapping("/v1/create-book")
-    public ResponseEntity<RestResponse<?>> createBook(@Valid @RequestBody CreateBookRequestDto request) {
+    public ResponseEntity<RestResponse<Object>> createBook(@Valid @RequestBody CreateBookRequestDto request) {
         bookService.createBook(request);
         return ResponseEntity.ok(new RestResponse<>());
     }
 
     @PostMapping("/v1/update-book-stocks")
-    public ResponseEntity<RestResponse<?>> updateBookStocks(@Valid @RequestBody UpdateBookStocksRequestDto request) {
+    public ResponseEntity<RestResponse<Object>> updateBookStocks(@Valid @RequestBody UpdateBookStocksRequestDto request) {
         bookService.updateBookStocks(request);
         return ResponseEntity.ok(new RestResponse<>());
     }
