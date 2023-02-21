@@ -27,4 +27,9 @@ public class CustomerServiceImpl implements CustomerService {
         Customer customer = customerMapper.mapCustomerToCreateCustomerRequestDto(request);
         customerRepository.save(customer);
     }
+
+    @Override
+    public long countByEmail(String email) {
+        return customerRepository.countByEmail(email);
+    }
 }

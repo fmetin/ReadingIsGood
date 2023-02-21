@@ -1,5 +1,6 @@
 package com.fmetin.readingisgood.dto;
 
+import com.fmetin.readingisgood.annotation.UniqueEmail;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -15,6 +16,11 @@ public class CreateCustomerRequestDto {
     @NotNull(message = MSG_VALIDATION_CONSTRAINT_SURNAME_NOTNULL)
     @Size(min = 1, max = 255, message = MSG_VALIDATION_CONSTRAINT_SURNAME_SIZE)
     private String surname;
+
+    @NotNull(message = MSG_VALIDATION_CONSTRAINT_EMAIL_NOTNULL)
+    @Size(min = 1, max = 255, message = MSG_VALIDATION_CONSTRAINT_EMAIL_SIZE)
+    @UniqueEmail
+    private String email;
     @NotNull(message = MSG_VALIDATION_CONSTRAINT_PASSWORD_NOTNULL)
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message = MSG_VALIDATION_CONSTRAINT_PASSWORD_PATTERN)
     private String password;

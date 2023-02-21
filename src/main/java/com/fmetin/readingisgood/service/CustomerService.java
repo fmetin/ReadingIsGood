@@ -4,4 +4,6 @@ import com.fmetin.readingisgood.dto.CreateCustomerRequestDto;
 
 public interface CustomerService {
     void createCustomer(CreateCustomerRequestDto request);
+
+    long countByEmail(String email);
 }

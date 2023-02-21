@@ -16,6 +16,7 @@ public class Customer {
     @Id
     @GeneratedValue
     private long customerId;
+    private String email;
     private String name;
     private String surname;
     private String password;

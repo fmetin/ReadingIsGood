@@ -1,7 +1,7 @@
 package com.fmetin.readingisgood.annotation;
 
 
-import com.fmetin.readingisgood.annotation.validator.UniqueBookNameValidator;
+import com.fmetin.readingisgood.annotation.validator.UniqueEmailValidator;
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
 
@@ -10,16 +10,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static com.fmetin.readingisgood.shared.RestResponseMessage.MSG_VALIDATION_CONSTRAINT_UNIQUEBOOKNAME;
+import static com.fmetin.readingisgood.shared.RestResponseMessage.MSG_VALIDATION_CONSTRAINT_UNIQUEEMAIL;
 
 @Target({ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Constraint(
-        validatedBy = {UniqueBookNameValidator.class}
+        validatedBy = {UniqueEmailValidator.class}
 )
-public @interface UniqueBookName {
+public @interface UniqueEmail {
 
-    String message() default MSG_VALIDATION_CONSTRAINT_UNIQUEBOOKNAME;
+    String message() default MSG_VALIDATION_CONSTRAINT_UNIQUEEMAIL;
 
     Class<?>[] groups() default {};
 

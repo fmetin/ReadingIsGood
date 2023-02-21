@@ -9,6 +9,7 @@ public class RestResponseMessage {
     public final static String MSG_UNKNOWN_ERROR = "{unknown.error}";
     public final static String MSG_ORDER_NOT_FOUND = "{order.not.found}";
     public final static String MSG_VALIDATION_CONSTRAINT_UNIQUEBOOKNAME = "{validation.constraint.UniqueBookName.message}";
+    public final static String MSG_VALIDATION_CONSTRAINT_UNIQUEEMAIL = "{validation.constraint.UniqueEmail.message}";
     public final static String MSG_VALIDATION_CONSTRAINT_NAME_NOTNULL = "{validation.constraint.name.NotNull.message}";
     public final static String MSG_VALIDATION_CONSTRAINT_NAME_SIZE = "{validation.constraint.name.Size.message}";
     public final static String MSG_VALIDATION_CONSTRAINT_SURNAME_NOTNULL = "{validation.constraint.surname.NotNull.message}";
@@ -18,6 +19,8 @@ public class RestResponseMessage {
     public final static String MSG_VALIDATION_CONSTRAINT_BOOK_ID_NOTNULL = "{validation.constraint.book.id.NotNull.message}";
     public final static String MSG_VALIDATION_CONSTRAINT_ORDER_LIST_NOTNULL = "{validation.constraint.order.list.NotNull.message}";
     public final static String MSG_VALIDATION_CONSTRAINT_ORDER_LIST_NOTEMPTY = "{validation.constraint.order.list.NotEmpty.message}";
+    public final static String MSG_VALIDATION_CONSTRAINT_EMAIL_NOTNULL = "{validation.constraint.email.NotNull.message}";
+    public final static String MSG_VALIDATION_CONSTRAINT_EMAIL_SIZE = "{validation.constraint.email.Size.message}";
 
     public final static String MSG_VALIDATION_CONSTRAINT_PASSWORD_NOTNULL = "{validation.constraint.password.NotNull.message}";
     public final static String MSG_VALIDATION_CONSTRAINT_PASSWORD_PATTERN = "{validation.constraint.password.Pattern.message}";

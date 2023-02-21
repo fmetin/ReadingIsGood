@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,39 +44,45 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void order(OrderRequestDto request) {
-        Order order = new Order();
-        order.setCreatedDate(LocalDateTime.now());
-        order.setCustomerId(request.getCustomerId());
-        order.setStatus(OrderStatusEnum.IN_PROGRESS.getStatus());
-        order = orderRepository.save(order);
+    public void order(OrderRequestDto request, Order order) {
 
         try {
-            List<Book> orderListBook = new ArrayList<>();
             List<OrderDetail> orderDetailList = new ArrayList<>();
 
-            checkOrderList(request, orderListBook, orderDetailList, order);
-            saveOrders(orderListBook, orderDetailList);
+            checkOrderList(request, orderDetailList, order);
+            orderDetailRepository.saveAll(orderDetailList);
 
             order.setStatus(OrderStatusEnum.COMPLETED.getStatus());
             orderRepository.save(order);
         } catch (RestException restException) {
-            log.error(restException.getLocalizedMessage());
-            order.setStatus(OrderStatusEnum.FAILED.getStatus());
-            orderRepository.save(order);
+            log.error(restException.getResponseMessage());
             throw restException;
         } catch (Exception e) {
             log.error(e.getMessage());
-            order.setStatus(OrderStatusEnum.FAILED.getStatus());
-            orderRepository.save(order);
             throw e;
         }
 
     }
 
     @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Order getOrder(OrderRequestDto request) {
+        Order order = new Order();
+        order.setCreatedDate(LocalDateTime.now());
+        order.setCustomerId(request.getCustomerId());
+        order.setStatus(OrderStatusEnum.IN_PROGRESS.getStatus());
+        order = orderRepository.save(order);
+        return order;
+    }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public Order save(Order order) {
+        return orderRepository.save(order);
+    }
+
+    @Override
     public OrderResponseDto getOrderById(Long orderId) {
-        //todo security içinde yapılınca bu kontrol kaldırılacak.
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
         if (optionalOrder.isEmpty())
             throw new RestException(ORDER_NOT_FOUND);
@@ -102,32 +110,24 @@ public class OrderServiceImpl implements OrderService {
         return responseDtoList;
     }
 
-    private void saveOrders(List<Book> orderListBook, List<OrderDetail> orderDetailList) {
-        for (int i = 0; i < orderDetailList.size(); i++) {
-            Book book = orderListBook.get(i);
-            UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
-            updateBookStocksRequestDto.setBookId(book.getBookId());
-            updateBookStocksRequestDto.setStock(book.getStock() - 1);
-            bookService.updateBookStocks(updateBookStocksRequestDto);
-
-            OrderDetail orderDetail = orderDetailList.get(i);
-            orderDetailRepository.save(orderDetail);
-        }
-    }
 
     private void checkOrderList(OrderRequestDto request,
-                                List<Book> orderListBook,
-                                List<OrderDetail> orderDetailList,
-                                Order order) {
+                               List<OrderDetail> orderDetailList,
+                               Order order) {
         for (OrderDetailsDto orderDetailsDto : request.getOrderList()) {
             Book book = bookService.findByBookId(orderDetailsDto.getBookId());
-            if (book.getStock() <= 0)
+
+            if (book.getStock() - orderDetailsDto.getCount() < 0)
                 throw new RestException(THERE_IS_NOT_STOCK);
+
             OrderDetail orderDetail = orderMapper.mapOrderToOrderDetail(order);
             orderDetail.setBookId(book.getBookId());
-            orderDetail = orderDetailRepository.save(orderDetail);
-            orderListBook.add(book);
             orderDetailList.add(orderDetail);
+
+            UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
+            updateBookStocksRequestDto.setBookId(orderDetailsDto.getBookId());
+            updateBookStocksRequestDto.setStock(book.getStock() - orderDetailsDto.getCount());
+            bookService.updateBookStocks(updateBookStocksRequestDto);
         }
     }
 }

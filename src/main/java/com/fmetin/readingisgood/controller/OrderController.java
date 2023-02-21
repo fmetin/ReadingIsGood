@@ -1,45 +1,47 @@
 package com.fmetin.readingisgood.controller;
 
-import com.fmetin.readingisgood.dto.CreateBookRequestDto;
+import com.fmetin.readingisgood.annotation.CurrentUser;
+import com.fmetin.readingisgood.conf.CustomerUserDetails;
 import com.fmetin.readingisgood.dto.OrderListByDateRequestDto;
 import com.fmetin.readingisgood.dto.OrderRequestDto;
 import com.fmetin.readingisgood.service.OrderService;
+import com.fmetin.readingisgood.service.impl.OrderTransactionService;
 import com.fmetin.readingisgood.shared.RestResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class OrderController {
 
     private final OrderService orderService;
+    private final OrderTransactionService orderTransactionService;
 
     @Autowired
-    public OrderController(OrderService orderService) {
+    public OrderController(OrderService orderService, OrderTransactionService orderTransactionService) {
         this.orderService = orderService;
+        this.orderTransactionService = orderTransactionService;
     }
 
     @PostMapping("/v1/order")
-    public ResponseEntity<RestResponse<?>> order(@Valid @RequestBody OrderRequestDto request) {
-        //todo get customerId from security context
-        request.setCustomerId(1L);
-        orderService.order(request);
+    public ResponseEntity<RestResponse<?>> order(@Valid @RequestBody OrderRequestDto request,
+                                                 @CurrentUser CustomerUserDetails customerUserDetails) {
+        request.setCustomerId(customerUserDetails.getUser().getCustomerId());
+        orderTransactionService.order(request);
         return ResponseEntity.ok(new RestResponse<>());
     }
 
     @GetMapping("/v1/order/{orderId}")
+    @PreAuthorize("@customerSecurity.isAllowedToAccess(#orderId, principal.user)")
     public ResponseEntity<?> getOrderById(@PathVariable Long orderId) {
-        //todo check customerId to get order response
         return ResponseEntity.ok(new RestResponse<>(orderService.getOrderById(orderId)));
     }
 
     @PostMapping("/v1/order-list-by-date")
-    public ResponseEntity<RestResponse<?>> orderListByDate(@Valid @RequestBody OrderListByDateRequestDto request) {
-        //todo check customerId to get order response
-        return ResponseEntity.ok(new RestResponse<>(orderService.orderListByDate(request, 1L)));
+    public ResponseEntity<RestResponse<?>> orderListByDate(@Valid @RequestBody OrderListByDateRequestDto request,
+                                                           @CurrentUser CustomerUserDetails customerUserDetails) {
+        return ResponseEntity.ok(new RestResponse<>(orderService.orderListByDate(request, customerUserDetails.getUser().getCustomerId())));
     }
 }

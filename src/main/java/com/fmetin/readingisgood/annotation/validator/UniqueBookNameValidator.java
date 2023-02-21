@@ -1,5 +1,6 @@
-package com.fmetin.readingisgood.annotation;
+package com.fmetin.readingisgood.annotation.validator;
 
+import com.fmetin.readingisgood.annotation.UniqueBookName;
 import com.fmetin.readingisgood.service.BookService;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

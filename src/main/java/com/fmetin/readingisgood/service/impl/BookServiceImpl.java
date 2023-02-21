@@ -8,6 +8,7 @@ import com.fmetin.readingisgood.repository.BookRepository;
 import com.fmetin.readingisgood.service.BookService;
 import com.fmetin.readingisgood.shared.RestException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;

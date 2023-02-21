@@ -22,7 +22,7 @@ public abstract class OrderMapper {
     @Mapping(target = "createdDate", expression = "java(localDateTimeUtil.now())")
     public abstract Order mapOrderDetailsDtoToOrder(OrderDetailsDto orderDetailsDto);
 
-    public abstract OrderDetail mapOrderToOrderDetail(Order Order);
+    public abstract OrderDetail mapOrderToOrderDetail(Order order);
     public abstract OrderDetailResponseDto mapOrderToOrderDetail(OrderDetail orderDetail);
     public abstract List<OrderDetailResponseDto> mapOrderDetailListToOrderDetailResponseList(List<OrderDetail> orderDetailList);
 
