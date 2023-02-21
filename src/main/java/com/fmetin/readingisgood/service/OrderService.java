@@ -9,14 +9,16 @@ import com.fmetin.readingisgood.entity.OrderDetail;
 import java.util.List;
 
 public interface OrderService {
-    void order(OrderRequestDto request, Order order);
+    void order(OrderRequestDto request);
 
     OrderResponseDto getOrderById(Long orderId);
 
     List<OrderResponseDto> orderListByDate(OrderListByDateRequestDto request, Long customerId);
 
-    Order getOrder(OrderRequestDto request);
+    Order save(OrderRequestDto request);
 
     Order save(Order order);
+
+    OrderDetail saveOrderDetail(OrderDetail orderDetail);
 
 }

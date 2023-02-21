@@ -18,6 +18,8 @@ public class OrderDetail {
     private long orderId;
     private long bookId;
     private long customerId;
+
+    private long count;
     @Temporal(TemporalType.TIMESTAMP)
     private LocalDateTime createdDate;
 

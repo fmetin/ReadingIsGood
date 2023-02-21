@@ -44,16 +44,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void order(OrderRequestDto request, Order order) {
+    public void order(OrderRequestDto request) {
 
         try {
-            List<OrderDetail> orderDetailList = new ArrayList<>();
+            for (OrderDetailsDto orderDetailsDto : request.getOrderList()) {
+                Book book = bookService.findByBookId(orderDetailsDto.getBookId());
 
-            checkOrderList(request, orderDetailList, order);
-            orderDetailRepository.saveAll(orderDetailList);
+                if (book.getStock() - orderDetailsDto.getCount() < 0)
+                    throw new RestException(THERE_IS_NOT_STOCK);
 
-            order.setStatus(OrderStatusEnum.COMPLETED.getStatus());
-            orderRepository.save(order);
+                UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
+                updateBookStocksRequestDto.setBookId(orderDetailsDto.getBookId());
+                updateBookStocksRequestDto.setStock(book.getStock() - orderDetailsDto.getCount());
+                bookService.updateBookStocks(updateBookStocksRequestDto);
+            }
         } catch (RestException restException) {
             log.error(restException.getResponseMessage());
             throw restException;
@@ -66,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public Order getOrder(OrderRequestDto request) {
+    public Order save(OrderRequestDto request) {
         Order order = new Order();
         order.setCreatedDate(LocalDateTime.now());
         order.setCustomerId(request.getCustomerId());
@@ -80,6 +84,13 @@ public class OrderServiceImpl implements OrderService {
     public Order save(Order order) {
         return orderRepository.save(order);
     }
+
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public OrderDetail saveOrderDetail(OrderDetail orderDetail) {
+        return orderDetailRepository.save(orderDetail);
+    }
+
 
     @Override
     public OrderResponseDto getOrderById(Long orderId) {
@@ -108,26 +119,5 @@ public class OrderServiceImpl implements OrderService {
             responseDtoList.add(getOrderById(order.getOrderId()));
         }
         return responseDtoList;
-    }
-
-
-    private void checkOrderList(OrderRequestDto request,
-                               List<OrderDetail> orderDetailList,
-                               Order order) {
-        for (OrderDetailsDto orderDetailsDto : request.getOrderList()) {
-            Book book = bookService.findByBookId(orderDetailsDto.getBookId());
-
-            if (book.getStock() - orderDetailsDto.getCount() < 0)
-                throw new RestException(THERE_IS_NOT_STOCK);
-
-            OrderDetail orderDetail = orderMapper.mapOrderToOrderDetail(order);
-            orderDetail.setBookId(book.getBookId());
-            orderDetailList.add(orderDetail);
-
-            UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
-            updateBookStocksRequestDto.setBookId(orderDetailsDto.getBookId());
-            updateBookStocksRequestDto.setStock(book.getStock() - orderDetailsDto.getCount());
-            bookService.updateBookStocks(updateBookStocksRequestDto);
-        }
     }
 }
