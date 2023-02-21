@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@Table(name = "ORDER_BOOK")
+@Table(name = "ORDER_TRANSACTION")
 public class Order {
 
     @Id

@@ -1,10 +1,12 @@
 package com.fmetin.readingisgood.service;
 
+import com.fmetin.readingisgood.dto.CustomerOrdersResponseDto;
 import com.fmetin.readingisgood.dto.OrderListByDateRequestDto;
 import com.fmetin.readingisgood.dto.OrderRequestDto;
 import com.fmetin.readingisgood.dto.OrderResponseDto;
 import com.fmetin.readingisgood.entity.Order;
 import com.fmetin.readingisgood.entity.OrderDetail;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -21,4 +23,5 @@ public interface OrderService {
 
     OrderDetail saveOrderDetail(OrderDetail orderDetail);
 
+    CustomerOrdersResponseDto getCustomerOrders(long customerId, Pageable pageable);
 }

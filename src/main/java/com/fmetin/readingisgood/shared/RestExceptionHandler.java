@@ -43,7 +43,7 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.OK)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ResponseBody
     public RestResponse<Void> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         Map<String, String> validationErrors = new HashMap<>();

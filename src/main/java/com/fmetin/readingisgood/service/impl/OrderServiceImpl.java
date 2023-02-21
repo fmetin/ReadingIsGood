@@ -13,6 +13,8 @@ import com.fmetin.readingisgood.service.OrderService;
 import com.fmetin.readingisgood.shared.RestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -89,6 +91,26 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public OrderDetail saveOrderDetail(OrderDetail orderDetail) {
         return orderDetailRepository.save(orderDetail);
+    }
+
+    @Override
+    public CustomerOrdersResponseDto getCustomerOrders(long customerId, Pageable pageable) {
+        List<OrderResponseDto> customerOrderList = new ArrayList<>();
+        CustomerOrdersResponseDto responseDto = new CustomerOrdersResponseDto();
+        responseDto.setCustomerOrderList(customerOrderList);
+
+        Page<Order> page = orderRepository.findByCustomerId(customerId, pageable);
+        if (page.getContent().isEmpty())
+            return responseDto;
+        List<Order> orderList = page.getContent();
+        orderList.forEach(order -> {
+            customerOrderList.add(getOrderById(order.getOrderId()));
+        });
+        responseDto.setSize(page.getSize());
+        responseDto.setTotalElements(page.getTotalElements());
+        responseDto.setTotalPages(page.getTotalPages());
+        responseDto.setPageNumber(page.getNumber());
+        return responseDto;
     }
 
 
