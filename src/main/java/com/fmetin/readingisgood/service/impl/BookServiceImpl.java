@@ -46,13 +46,6 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void updateBookStocks(UpdateBookStocksRequestDto request) {
-        Optional<Book> optionalBook = bookRepository.findById(request.getBookId());
-        if (optionalBook.isEmpty())
-            throw new RestException(BOOK_NOT_FOUND);
-
-        Book book = optionalBook.get();
-        book.setStock(request.getStock());
-        book.setUpdatedDate(LocalDateTime.now());
-        bookRepository.save(book);
+        bookRepository.updateStockAndUpdatedDateByBookId(request.getStock(), LocalDateTime.now(), request.getBookId());
     }
 }

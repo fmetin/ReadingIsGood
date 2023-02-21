@@ -19,7 +19,8 @@ public class RestResponseCode {
     public static final RestResponseCode THERE_IS_NOT_STOCK = new RestResponseCode("GNL-0005", MSG_THERE_IS_NOT_STOCK);
     public static final RestResponseCode UNKNOWN_ERROR = new RestResponseCode("GNL-0006", MSG_UNKNOWN_ERROR);
     public static final RestResponseCode ORDER_NOT_FOUND = new RestResponseCode("GNL-0007", MSG_ORDER_NOT_FOUND);
-    public static final RestResponseCode REDIS_LOCK_ERROR = new RestResponseCode("GNL-0007", MSG_REDIS_LOCK_ERROR);
+    public static final RestResponseCode REDIS_LOCK_ERROR = new RestResponseCode("GNL-0008", MSG_REDIS_LOCK_ERROR);
+    public static final RestResponseCode TRANSACTION_TIMEOUT = new RestResponseCode("GNL-0009", MSG_TRANSACTION_TIMEOUT);
     public String getlocalizedResponseMessage() {
         return Translator.toLocale(responseMessage);
     }

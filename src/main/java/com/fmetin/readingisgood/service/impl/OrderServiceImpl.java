@@ -15,6 +15,7 @@ import com.fmetin.readingisgood.service.OrderService;
 import com.fmetin.readingisgood.shared.RestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -27,12 +28,19 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.fmetin.readingisgood.shared.RestResponseCode.*;
 
 @Service
 @Slf4j
 public class OrderServiceImpl implements OrderService {
+
+    @Value("${redis.lock.timeout.seconds:3}")
+    private int redisLockTimeoutSeconds;
+
+    @Value("${redis.lock.acquired.seconds:1}")
+    private int redisLockAcquiredSeconds;
 
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
@@ -56,15 +64,20 @@ public class OrderServiceImpl implements OrderService {
         try {
             for (OrderDetailsDto orderDetailsDto : request.getOrderList()) {
                 String key = "bookdId:" + orderDetailsDto.getBookId();
-                LockExecutionResult<String> result = locker.lock(key, 1, 3, () -> {
+                LockExecutionResult<String> result = locker.lock(key, redisLockAcquiredSeconds, redisLockTimeoutSeconds, () -> {
+                    final long startTimestamp = System.currentTimeMillis();
+                    final long lockTimeout = TimeUnit.SECONDS.toMillis(redisLockTimeoutSeconds);
                     Book book = bookService.findByBookId(orderDetailsDto.getBookId());
-
+                    log.info("book stock:{}", book.getStock());
                     if (book.getStock() - orderDetailsDto.getCount() < 0)
                         throw new RestException(THERE_IS_NOT_STOCK);
 
                     UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
                     updateBookStocksRequestDto.setBookId(orderDetailsDto.getBookId());
                     updateBookStocksRequestDto.setStock(book.getStock() - orderDetailsDto.getCount());
+                    if (System.currentTimeMillis() - startTimestamp >= lockTimeout) {
+                        throw new RestException(TRANSACTION_TIMEOUT);
+                    }
                     bookService.updateBookStocks(updateBookStocksRequestDto);
                     return null;
                 });
