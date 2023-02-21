@@ -58,7 +58,7 @@ public class OrderTransactionServiceImpl implements OrderTransactionService {
 
         try {
             orderService.order(orderRequestDto);
-        } catch (RestException e) {
+        } catch (Exception e) {
             order.setStatus(OrderStatusEnum.FAILED.getStatus());
             orderService.save(order);
             throw e;

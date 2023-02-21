@@ -5,6 +5,8 @@ import com.fmetin.readingisgood.entity.Book;
 import com.fmetin.readingisgood.entity.Order;
 import com.fmetin.readingisgood.entity.OrderDetail;
 import com.fmetin.readingisgood.enums.OrderStatusEnum;
+import com.fmetin.readingisgood.locker.DistributedLocker;
+import com.fmetin.readingisgood.locker.LockExecutionResult;
 import com.fmetin.readingisgood.mapper.OrderMapper;
 import com.fmetin.readingisgood.repository.OrderDetailRepository;
 import com.fmetin.readingisgood.repository.OrderRepository;
@@ -37,12 +39,15 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final BookService bookService;
 
+    private final DistributedLocker locker;
+
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, OrderMapper orderMapper, BookService bookService) {
+    public OrderServiceImpl(OrderRepository orderRepository, OrderDetailRepository orderDetailRepository, OrderMapper orderMapper, BookService bookService, DistributedLocker locker) {
         this.orderRepository = orderRepository;
         this.orderDetailRepository = orderDetailRepository;
         this.orderMapper = orderMapper;
         this.bookService = bookService;
+        this.locker = locker;
     }
 
     @Override
@@ -50,15 +55,23 @@ public class OrderServiceImpl implements OrderService {
 
         try {
             for (OrderDetailsDto orderDetailsDto : request.getOrderList()) {
-                Book book = bookService.findByBookId(orderDetailsDto.getBookId());
+                String key = "bookdId:" + orderDetailsDto.getBookId();
+                LockExecutionResult<String> result = locker.lock(key, 1, 3, () -> {
+                    Book book = bookService.findByBookId(orderDetailsDto.getBookId());
 
-                if (book.getStock() - orderDetailsDto.getCount() < 0)
-                    throw new RestException(THERE_IS_NOT_STOCK);
+                    if (book.getStock() - orderDetailsDto.getCount() < 0)
+                        throw new RestException(THERE_IS_NOT_STOCK);
 
-                UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
-                updateBookStocksRequestDto.setBookId(orderDetailsDto.getBookId());
-                updateBookStocksRequestDto.setStock(book.getStock() - orderDetailsDto.getCount());
-                bookService.updateBookStocks(updateBookStocksRequestDto);
+                    UpdateBookStocksRequestDto updateBookStocksRequestDto = new UpdateBookStocksRequestDto();
+                    updateBookStocksRequestDto.setBookId(orderDetailsDto.getBookId());
+                    updateBookStocksRequestDto.setStock(book.getStock() - orderDetailsDto.getCount());
+                    bookService.updateBookStocks(updateBookStocksRequestDto);
+                    return null;
+                });
+                if (result.hasException())
+                    throw (RestException) result.exception;
+
+
             }
         } catch (RestException restException) {
             log.error(restException.getResponseMessage());
