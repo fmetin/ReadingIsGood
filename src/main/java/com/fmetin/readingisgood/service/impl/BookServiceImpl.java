@@ -47,7 +47,10 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public BigDecimal findByBookIdToGetPrice(Long bookId) {
-        return bookRepository.findByBookIdToGetPrice(bookId);
+        BigDecimal price = bookRepository.findByBookIdToGetPrice(bookId);
+        if (price == null)
+            throw new RestException(BOOK_NOT_FOUND);
+        return price;
     }
 
     @Override
@@ -57,6 +60,9 @@ public class BookServiceImpl implements BookService {
 
     @Override
     public void updateBookStocks(UpdateBookStocksRequestDto request) {
-        bookRepository.updateStockAndUpdatedDateByBookId(request.getStock(), LocalDateTime.now(), request.getBookId());
+        int result = bookRepository.updateStockAndUpdatedDateByBookId(request.getStock(), LocalDateTime.now(), request.getBookId());
+        if (result == 0)
+            throw new RestException(BOOK_NOT_FOUND);
+
     }
 }

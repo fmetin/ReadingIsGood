@@ -1,7 +1,6 @@
 package com.fmetin.readingisgood.service.impl;
 
 import com.fmetin.readingisgood.dto.*;
-import com.fmetin.readingisgood.entity.Book;
 import com.fmetin.readingisgood.entity.Order;
 import com.fmetin.readingisgood.entity.OrderDetail;
 import com.fmetin.readingisgood.enums.OrderStatusEnum;
@@ -16,12 +15,10 @@ import com.fmetin.readingisgood.shared.CommonProperties;
 import com.fmetin.readingisgood.shared.RestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -143,10 +140,13 @@ public class OrderServiceImpl implements OrderService {
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
         if (optionalOrder.isEmpty())
             throw new RestException(ORDER_NOT_FOUND);
+        Order order = optionalOrder.get();
         List<OrderDetail> orderDetailList = orderDetailRepository.findByOrderId(orderId);
         OrderResponseDto orderResponseDto = new OrderResponseDto();
         orderResponseDto.setOrderDetails(orderMapper.mapOrderDetailListToOrderDetailResponseList(orderDetailList));
-        orderResponseDto.setStatus(optionalOrder.get().getStatus());
+        orderResponseDto.setStatus(order.getStatus());
+        orderResponseDto.setCountOfItems(order.getCountOfItems());
+        orderResponseDto.setTotalAmount(order.getTotalAmount());
         return orderResponseDto;
     }
 
@@ -157,7 +157,7 @@ public class OrderServiceImpl implements OrderService {
         if (endDate.isBefore(startDate))
             throw new RestException(VALIDATION_ERROR, HttpStatus.BAD_REQUEST);
         List<OrderResponseDto> responseDtoList = new ArrayList<>();
-        List<Order> orderList = orderRepository.findByCustomerIdAndCreatedDateBetween(
+        List<Order> orderList = orderRepository.findByCustomerIdAndCreatedDateBetweenOrderByCreatedDateDesc(
                 customerId,
                 startDate,
                 endDate);

@@ -4,6 +4,7 @@ public class RestResponseMessage {
     public final static String MSG_FORBIDDEN_ERROR = "{forbidden.error}";
     public final static String MSG_VALIDATION_ERROR = "{validation.error}";
     public final static String MSG_BAD_CREDENTIAL = "{bad.credential}";
+    public final static String MSG_UNAUTHORIZED = "{unauthorized.error}";
     public final static String MSG_BOOK_NOT_FOUND = "{book.not.found}";
     public final static String MSG_THERE_IS_NOT_STOCK = "{there.is.not.stock}";
     public final static String MSG_UNKNOWN_ERROR = "{unknown.error}";
@@ -26,5 +27,6 @@ public class RestResponseMessage {
 
     public final static String MSG_VALIDATION_CONSTRAINT_PASSWORD_NOTNULL = "{validation.constraint.password.NotNull.message}";
     public final static String MSG_VALIDATION_CONSTRAINT_PASSWORD_PATTERN = "{validation.constraint.password.Pattern.message}";
+    public final static String MSG_VALIDATION_CONSTRAINT_EMAIL_PATTERN = "{validation.constraint.email.Pattern.message}";
 
 }

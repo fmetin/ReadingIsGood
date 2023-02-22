@@ -3,6 +3,7 @@ package com.fmetin.readingisgood.shared;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -20,6 +21,17 @@ import static com.fmetin.readingisgood.shared.RestResponseCode.*;
 
 @ControllerAdvice
 public class RestExceptionHandler {
+    @ExceptionHandler(InsufficientAuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseBody
+    public RestResponse<Void> handleInsufficientAuthenticationException(InsufficientAuthenticationException e) {
+        return new RestResponse<>(
+                new RestResponseHeader(UNAUTHORIZED.getResponseCode(),
+                        UNAUTHORIZED.getlocalizedResponseMessage()),
+                null, null
+        );
+    }
+
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
@@ -31,7 +43,7 @@ public class RestExceptionHandler {
         );
     }
 
-    @ExceptionHandler(AccessDeniedException.class)
+    @ExceptionHandler({AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class})
     @ResponseStatus(HttpStatus.FORBIDDEN)
     @ResponseBody
     public RestResponse<Void> handleAccessDeniedException(AccessDeniedException e) {

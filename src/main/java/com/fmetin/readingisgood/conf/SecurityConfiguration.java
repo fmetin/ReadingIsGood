@@ -32,10 +32,10 @@ public class SecurityConfiguration {
         String[] permittedUrls = {"/v1/create-customer", "/h2-console", "/h2-console/**"};
         http.httpBasic().authenticationEntryPoint(delegatedAuthenticationEntryPoint).and().exceptionHandling();
         http.authorizeHttpRequests()
-                .anyRequest().permitAll();
-//                .requestMatchers(permittedUrls).permitAll()
-//                .and()
-//                .authorizeHttpRequests().anyRequest().authenticated();
+//                .anyRequest().permitAll();
+                .requestMatchers(permittedUrls).permitAll()
+                .and()
+                .authorizeHttpRequests().anyRequest().authenticated();
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 

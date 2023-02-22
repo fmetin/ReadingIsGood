@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    List<Order> findByCustomerIdAndCreatedDateBetween(long customerId, LocalDateTime createdDateStart, LocalDateTime createdDateEnd);
+    List<Order> findByCustomerIdAndCreatedDateBetweenOrderByCreatedDateDesc(long customerId, LocalDateTime createdDateStart, LocalDateTime createdDateEnd);
 
     @Query("select o from Order o where o.customerId = :customerId")
     Page<Order> findByCustomerId(@Param("customerId") long customerId, Pageable pageable);

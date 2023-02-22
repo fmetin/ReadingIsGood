@@ -19,7 +19,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Book b set b.stock = ?1, b.updatedDate = ?2 where b.bookId = ?3")
-    void updateStockAndUpdatedDateByBookId(int stock, LocalDateTime updatedDate, long bookId);
+    int updateStockAndUpdatedDateByBookId(int stock, LocalDateTime updatedDate, long bookId);
 
 
 

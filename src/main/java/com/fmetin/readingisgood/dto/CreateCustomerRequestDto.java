@@ -20,6 +20,7 @@ public class CreateCustomerRequestDto {
     @NotNull(message = MSG_VALIDATION_CONSTRAINT_EMAIL_NOTNULL)
     @Size(min = 1, max = 255, message = MSG_VALIDATION_CONSTRAINT_EMAIL_SIZE)
     @UniqueEmail
+    @Pattern(regexp = "^(.+)@(.+)$", message = MSG_VALIDATION_CONSTRAINT_EMAIL_PATTERN)
     private String email;
     @NotNull(message = MSG_VALIDATION_CONSTRAINT_PASSWORD_NOTNULL)
     @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).*$", message = MSG_VALIDATION_CONSTRAINT_PASSWORD_PATTERN)

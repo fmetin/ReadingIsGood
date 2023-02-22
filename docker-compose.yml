@@ -1,0 +1,15 @@
+version: '3'
+services:
+  redis-server:
+    hostname: redis
+    image: 'redis'
+    ports:
+      - "6379:6379"
+  readingisgood-service:
+    build: .
+    links:
+      - redis-server
+    ports:
+      - "8080:8080"
+    depends_on:
+      - redis-server
