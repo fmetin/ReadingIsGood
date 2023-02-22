@@ -12,6 +12,7 @@ import com.fmetin.readingisgood.repository.OrderDetailRepository;
 import com.fmetin.readingisgood.repository.OrderRepository;
 import com.fmetin.readingisgood.service.BookService;
 import com.fmetin.readingisgood.service.OrderService;
+import com.fmetin.readingisgood.shared.CommonProperties;
 import com.fmetin.readingisgood.shared.RestException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +38,7 @@ import static com.fmetin.readingisgood.shared.RestResponseCode.*;
 @Slf4j
 public class OrderServiceImpl implements OrderService {
 
-    @Value("${redis.lock.timeout.seconds:3}")
-    private int redisLockTimeoutSeconds;
 
-    @Value("${redis.lock.acquired.seconds:1}")
-    private int redisLockAcquiredSeconds;
 
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
@@ -65,9 +62,9 @@ public class OrderServiceImpl implements OrderService {
         try {
             for (OrderDetailsDto orderDetailsDto : request.getOrderList()) {
                 String key = "bookdId:" + orderDetailsDto.getBookId();
-                LockExecutionResult<String> result = locker.lock(key, redisLockAcquiredSeconds, redisLockTimeoutSeconds, () -> {
+                LockExecutionResult<String> result = locker.lock(key, CommonProperties.REDIS_LOCK_ACQUIRED_SECONDS, CommonProperties.REDIS_LOCK_TIMEOUT_SECONDS, () -> {
                     final long startTimestamp = System.currentTimeMillis();
-                    final long lockTimeout = TimeUnit.SECONDS.toMillis(redisLockTimeoutSeconds);
+                    final long lockTimeout = TimeUnit.SECONDS.toMillis(CommonProperties.REDIS_LOCK_TIMEOUT_SECONDS);
                     int stock = bookService.findByBookIdToGetStock(orderDetailsDto.getBookId());
                     log.info("book stock:{}", stock);
                     if (stock - orderDetailsDto.getCount() < 0)

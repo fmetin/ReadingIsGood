@@ -3,6 +3,7 @@ package com.fmetin.readingisgood.controller;
 import com.fmetin.readingisgood.dto.CreateBookRequestDto;
 import com.fmetin.readingisgood.dto.UpdateBookStocksRequestDto;
 import com.fmetin.readingisgood.service.BookService;
+import com.fmetin.readingisgood.service.BookTransactionService;
 import com.fmetin.readingisgood.shared.RestResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
 public class BookController {
 
     private final BookService bookService;
+    private final BookTransactionService bookTransactionService;
 
     @Autowired
-    public BookController(BookService bookService) {
+    public BookController(BookService bookService, BookTransactionService bookTransactionService) {
         this.bookService = bookService;
+        this.bookTransactionService = bookTransactionService;
     }
 
     @PostMapping("/v1/create-book")
@@ -29,7 +32,7 @@ public class BookController {
 
     @PostMapping("/v1/update-book-stocks")
     public ResponseEntity<RestResponse<Object>> updateBookStocks(@Valid @RequestBody UpdateBookStocksRequestDto request) {
-        bookService.updateBookStocks(request);
+        bookTransactionService.updateBookStocks(request);
         return ResponseEntity.ok(new RestResponse<>());
     }
 }
