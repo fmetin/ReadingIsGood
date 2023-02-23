@@ -12,11 +12,19 @@ For building and running the application you need:
 
 ## Running the application locally
 
-Application and redis can be started easily with the help of the following command over the docker-compose.yml file.
+Application and redis can be started easily with the help of the following commands over the docker-compose.yml file.
+
+First step creating jar file with maven.
+
+```shell
+mvn clean install
+```
+Second step is docker compose
 
 ```shell
 docker-compose up
 ```
+After started the service we are done! We can start to consume services.
 
 ## Tech Stack
 - Java 17
