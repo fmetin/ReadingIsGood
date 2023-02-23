@@ -12,6 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.concurrent.TimeUnit;
+
+import static com.fmetin.readingisgood.shared.RestResponseCode.TRANSACTION_TIMEOUT;
+
 @Service
 @Slf4j
 public class BookTransactionServiceImpl implements BookTransactionService {
@@ -31,6 +35,11 @@ public class BookTransactionServiceImpl implements BookTransactionService {
         try {
             String key = "bookdId:" + request.getBookId();
             LockExecutionResult<String> result = locker.lock(key, CommonProperties.REDIS_LOCK_ACQUIRED_SECONDS, CommonProperties.REDIS_LOCK_TIMEOUT_SECONDS, () -> {
+                final long startTimestamp = System.currentTimeMillis();
+                final long lockTimeout = TimeUnit.SECONDS.toMillis(CommonProperties.REDIS_LOCK_TIMEOUT_SECONDS);
+                if (System.currentTimeMillis() - startTimestamp >= lockTimeout) {
+                    throw new RestException(TRANSACTION_TIMEOUT);
+                }
                 bookService.updateBookStocks(request);
                 return null;
             });

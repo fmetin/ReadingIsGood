@@ -17,8 +17,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 import static com.fmetin.readingisgood.shared.RestResponseCode.BOOK_NOT_FOUND;
+import static com.fmetin.readingisgood.shared.RestResponseCode.TRANSACTION_TIMEOUT;
 
 @Slf4j
 @Service
@@ -40,7 +42,12 @@ public class BookServiceImpl implements BookService {
         try {
             String key = "bookdName:" + request.getName();
             LockExecutionResult<String> result = locker.lock(key, 0, CommonProperties.REDIS_LOCK_TIMEOUT_SECONDS, () -> {
+                final long startTimestamp = System.currentTimeMillis();
+                final long lockTimeout = TimeUnit.SECONDS.toMillis(CommonProperties.REDIS_LOCK_TIMEOUT_SECONDS);
                 Book book = bookMapper.mapCreateBookRequestDtoToBook(request);
+                if (System.currentTimeMillis() - startTimestamp >= lockTimeout) {
+                    throw new RestException(TRANSACTION_TIMEOUT);
+                }
                 bookRepository.save(book);
                 return null;
             });
