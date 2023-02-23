@@ -22,6 +22,7 @@ docker-compose up
 - Java 17
 - Hibernate
 - Spring Boot Web, Security, Jpa
+- H2 database
 - Lombok
 - Redis
 
