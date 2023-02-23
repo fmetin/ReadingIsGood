@@ -14,7 +14,7 @@ For building and running the application you need:
 
 Application and redis can be started easily with the help of the following commands over the docker-compose.yml file.
 
-First step creating jar file with maven.
+First step is creating jar file with maven.
 
 ```shell
 mvn clean install
