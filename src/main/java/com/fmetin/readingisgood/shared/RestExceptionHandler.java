@@ -31,7 +31,27 @@ public class RestExceptionHandler {
                 null, null
         );
     }
+    @ExceptionHandler({AccessDeniedException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public RestResponse<Void> handleAccessDeniedException(AccessDeniedException e) {
+        return new RestResponse<>(
+                new RestResponseHeader(FORBIDDEN_ERROR.getResponseCode(),
+                        FORBIDDEN_ERROR.getlocalizedResponseMessage()),
+                null, null
+        );
+    }
 
+    @ExceptionHandler({org.springframework.security.access.AccessDeniedException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    @ResponseBody
+    public RestResponse<Void> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException e) {
+        return new RestResponse<>(
+                new RestResponseHeader(FORBIDDEN_ERROR.getResponseCode(),
+                        FORBIDDEN_ERROR.getlocalizedResponseMessage()),
+                null, null
+        );
+    }
     @ExceptionHandler(AuthenticationException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ResponseBody
@@ -43,16 +63,6 @@ public class RestExceptionHandler {
         );
     }
 
-    @ExceptionHandler({AccessDeniedException.class, org.springframework.security.access.AccessDeniedException.class})
-    @ResponseStatus(HttpStatus.FORBIDDEN)
-    @ResponseBody
-    public RestResponse<Void> handleAccessDeniedException(AccessDeniedException e) {
-        return new RestResponse<>(
-                new RestResponseHeader(FORBIDDEN_ERROR.getResponseCode(),
-                        FORBIDDEN_ERROR.getlocalizedResponseMessage()),
-                null, null
-        );
-    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)

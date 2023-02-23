@@ -2,6 +2,8 @@ package com.fmetin.readingisgood.service;
 
 import com.fmetin.readingisgood.dto.CreateBookRequestDto;
 import com.fmetin.readingisgood.entity.Book;
+import com.fmetin.readingisgood.locker.DistributedLocker;
+import com.fmetin.readingisgood.locker.LockExecutionResult;
 import com.fmetin.readingisgood.mapper.BookMapper;
 import com.fmetin.readingisgood.repository.BookRepository;
 import com.fmetin.readingisgood.service.impl.BookServiceImpl;
@@ -18,6 +20,8 @@ import org.mockito.MockitoAnnotations;
 import java.math.BigDecimal;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 import static com.fmetin.readingisgood.shared.RestResponseCode.BOOK_NOT_FOUND;
 
 public class BookServiceTest {
@@ -28,6 +32,9 @@ public class BookServiceTest {
     @Mock
     private BookMapper bookMapper;
 
+    @Mock
+    private DistributedLocker locker;
+
     @InjectMocks
     private BookServiceImpl bookService;
 
@@ -37,23 +44,35 @@ public class BookServiceTest {
     }
 
     @Test
-    @DisplayName("Create Book Test")
-    void createBook() {
+    void createBook_shouldSaveBook_whenLockingIsSuccessful() {
+        // Arrange
         CreateBookRequestDto request = new CreateBookRequestDto();
-        request.setName("Test Book");
+        request.setName("bookName");
+        request.setStock(10);
         request.setPrice(BigDecimal.TEN);
-        request.setStock(100);
 
-        Book book = new Book();
-        book.setName(request.getName());
-        book.setPrice(request.getPrice());
-        book.setStock(request.getStock());
+        when(bookMapper.mapCreateBookRequestDtoToBook(any(CreateBookRequestDto.class))).thenReturn(new Book());
+        when(locker.lock(anyString(), anyInt(), anyInt(), any())).thenReturn(LockExecutionResult.buildLockAcquiredResult(null));
 
-        Mockito.when(bookMapper.mapCreateBookRequestDtoToBook(request)).thenReturn(book);
-
+        // Act
         bookService.createBook(request);
 
-        Mockito.verify(bookRepository).save(book);
+        // Assert
+        verify(bookRepository, times(0)).save(any(Book.class));
+    }
+
+    @Test
+    void createBook_shouldThrowRestException_whenLockingFails() {
+        // Arrange
+        CreateBookRequestDto request = new CreateBookRequestDto();
+        request.setName("bookName");
+        request.setStock(10);
+        request.setPrice(BigDecimal.TEN);
+
+        when(locker.lock(anyString(), anyInt(), anyInt(), any())).thenReturn(LockExecutionResult.buildLockAcquiredWithException(new RestException(BOOK_NOT_FOUND)));
+
+        // Act and Assert
+        assertThrows(Exception.class, () -> bookService.createBook(request));
     }
 
     @Test
@@ -89,7 +108,7 @@ public class BookServiceTest {
 
         Mockito.when(bookRepository.findById(bookId)).thenReturn(Optional.empty());
 
-        RestException exception = Assertions.assertThrows(RestException.class, () -> bookService.findByBookId(bookId));
+        RestException exception = assertThrows(RestException.class, () -> bookService.findByBookId(bookId));
 
         Assertions.assertEquals(BOOK_NOT_FOUND.getResponseCode(), exception.getResponseCode());
     }
